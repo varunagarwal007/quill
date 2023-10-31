@@ -1,77 +1,77 @@
-"use client";
-import { use, useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Button } from "./ui/button";
+"use client"
+import { use, useState } from "react"
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog"
+import { Button } from "./ui/button"
 
-import Dropzone from "react-dropzone";
-import { Cloud, File, Loader2 } from "lucide-react";
-import { Progress } from "./ui/progress";
-import { useUploadThing } from "@/lib/uploadThing";
-import { useToast } from "./ui/use-toast";
-import { trpc } from "@/app/_trpc/client";
-import { useRouter } from "next/navigation";
+import Dropzone from "react-dropzone"
+import { Cloud, File, Loader2 } from "lucide-react"
+import { Progress } from "./ui/progress"
+import { useUploadThing } from "@/lib/uploadThing"
+import { useToast } from "./ui/use-toast"
+import { trpc } from "@/app/_trpc/client"
+import { useRouter } from "next/navigation"
 
 const UploadDropZone = () => {
-	const router = useRouter();
-	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const [uploadProgress, setUploadProgress] = useState<number>(0);
-	const { toast } = useToast();
-	const { startUpload } = useUploadThing("pdfUploader");
+	const router = useRouter()
+	const [isUploading, setIsUploading] = useState<boolean>(false)
+	const [uploadProgress, setUploadProgress] = useState<number>(0)
+	const { toast } = useToast()
+	const { startUpload } = useUploadThing("pdfUploader")
 
 	const { mutate: startPolling } = trpc.getFile.useMutation({
 		onSuccess: (file) => {
-			router.push(`/dashboard/${file.id}`);
+			router.push(`/dashboard/${file.id}`)
 		},
 		retry: true,
 		retryDelay: 1000,
-	});
+	})
 
 	const startSimulated = () => {
-		setUploadProgress(0);
+		setUploadProgress(0)
 
 		const interval = setInterval(() => {
 			setUploadProgress((e) => {
 				if (e >= 95) {
-					clearInterval(interval);
-					return e;
+					clearInterval(interval)
+					return e
 				}
-				return e + 5;
-			});
-		}, 500);
-		return interval;
-	};
+				return e + 5
+			})
+		}, 500)
+		return interval
+	}
 
 	return (
 		<Dropzone
 			multiple={false}
 			onDrop={async (acceptedFile) => {
-				setIsUploading(true);
-				console.log("Here");
+				setIsUploading(true)
+				console.log("Here")
 
-				const progressInterval = startSimulated();
+				const progressInterval = startSimulated()
 
-				const res = await startUpload(acceptedFile);
+				const res = await startUpload(acceptedFile)
 				if (!res) {
 					return toast({
 						title: "Something went wrong",
 						description: "Please try again later",
 						variant: "destructive",
-					});
+					})
 				}
 
-				const [fileResponse] = res;
-				const key = fileResponse.key;
-				if (!key) {
+				const [fileResponse] = res
+				const fileKey = fileResponse.key
+				if (!fileKey) {
 					return toast({
 						title: "Something went wrong",
 						description: "Please try again later",
 						variant: "destructive",
-					});
+					})
 				}
 
-				clearInterval(progressInterval);
-				setUploadProgress(100);
-				startPolling({ key });
+				clearInterval(progressInterval)
+				setUploadProgress(100)
+				startPolling({ key: fileKey })
 			}}
 		>
 			{({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -130,17 +130,17 @@ const UploadDropZone = () => {
 				</div>
 			)}
 		</Dropzone>
-	);
-};
+	)
+}
 
 const UploadButton = () => {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [isOpen, setIsOpen] = useState<boolean>(false)
 	return (
 		<Dialog
 			open={isOpen}
 			onOpenChange={(v) => {
 				if (!v) {
-					setIsOpen(v);
+					setIsOpen(v)
 				}
 			}}
 		>
@@ -151,7 +151,7 @@ const UploadButton = () => {
 				<UploadDropZone />
 			</DialogContent>
 		</Dialog>
-	);
-};
+	)
+}
 
-export default UploadButton;
+export default UploadButton
