@@ -1,4 +1,3 @@
-"use client"
 import { getUserSubscriptionPlan } from "@/lib/stripe"
 import React from "react"
 import {
